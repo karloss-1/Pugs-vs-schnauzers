@@ -1,7 +1,7 @@
 name: Garden checks
 on:
   push:
-    branches: [feature/pugs-garden-pwa]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:

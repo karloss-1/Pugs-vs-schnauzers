@@ -6,9 +6,9 @@
 
 ## Estado de entrega
 
-El proyecto está implementado y comprobado mediante **23 pruebas automatizadas**, incluyendo simulación de partidas completas y eventos de la interfaz con un DOM simulado. Está preparado en la rama local `feature/pugs-garden-pwa`.
+El proyecto está implementado y comprobado mediante **23 pruebas automatizadas**, incluyendo simulación de partidas completas y eventos de la interfaz con un DOM simulado. Está preparado en la rama local `main`.
 
-**No está publicado en GitHub ni desplegado en una URL pública.** El conector permitió leer el repositorio vacío `karloss-1/Pugs-vs-schnauzers`, pero rechazó la primera escritura porque requería una aprobación que el entorno no permitía solicitar. No se modificó el repositorio remoto ni `main`.
+**No está publicado en GitHub ni desplegado en una URL pública.** El conector permitió leer el repositorio vacío `karloss-1/Pugs-vs-schnauzers`, pero rechazó la primera escritura porque requería una aprobación que el entorno no permitía solicitar. También se intentó publicar directamente en `main` por instrucción del usuario y la escritura volvió a ser rechazada. No se modificó el repositorio remoto.
 
 La revisión visual disponible corresponde al arte original renderizado desde sus formas vectoriales; no es una captura del juego ejecutándose en Safari. La instalación, el rendimiento real, la interfaz en distintos tamaños y la caché offline real requieren validación posterior en navegador y iPhone. Ver [QA](docs/QA.md).
 
@@ -31,12 +31,12 @@ Abre `http://localhost:8000`. Para instalar y guardar la PWA en un iPhone, sirve
 El checkout local ya contiene una rama y un commit. Con conexión y permisos normales de GitHub:
 
 ```sh
-git push -u origin feature/pugs-garden-pwa
+git push -u origin main
 ```
 
-El repositorio remoto estaba completamente vacío al inspeccionarlo. Esta primera subida puede crear directamente la rama del juego. No requiere un merge a `main`.
+El repositorio remoto estaba completamente vacío al inspeccionarlo. Esta primera subida puede crear directamente la rama del juego. No requiere crear una rama de desarrollo ni hacer un merge.
 
-Para obtener una URL de juego, en **Settings → Pages**, selecciona **Deploy from a branch**, la rama `feature/pugs-garden-pwa` y la carpeta raíz `/`. GitHub Pages sirve los archivos estáticos; no se necesita una build. Alternativamente, se puede servir la misma carpeta en cualquier hosting estático HTTPS. La URL final depende de la configuración que se active y no se ha verificado en esta entrega.
+Para obtener una URL de juego, en **Settings → Pages**, selecciona **Deploy from a branch**, la rama `main` y la carpeta raíz `/`. GitHub Pages sirve los archivos estáticos; no se necesita una build. Alternativamente, se puede servir la misma carpeta en cualquier hosting estático HTTPS. La URL final depende de la configuración que se active y no se ha verificado en esta entrega.
 
 ## Instalar en iPhone
 
