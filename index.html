@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#315e51"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Pugs vs Schnauzers">
+<meta name="description" content="Un jardín. Cinco Pugs. Demasiados bigotes. Defiende tu patio en este juego original para iPhone.">
+<title>Pugs vs. Schnauzers · La batalla del jardín</title>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png"><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main id="app">
+<header class="hud">
+ <a class="wordmark" href="#" aria-label="Ver instrucciones">PUGS <span>vs.</span> SCHNAUZERS</a>
+ <div class="treat-counter" aria-label="Premios disponibles"><span class="bone-icon">✦</span><strong id="treats">350</strong><small>premios</small></div>
+ <div class="wave-meter"><div class="wave-label"><span id="wave-label">Tu jardín, tus reglas</span><span id="wave-number">0 / 9</span></div><div class="track"><i id="wave-fill"></i></div></div>
+ <div id="lives" class="lives" aria-label="3 oportunidades">♥ ♥ ♥</div>
+ <button id="sound" class="round-button" aria-label="Desactivar sonido" title="Sonido">♪</button>
+ <button id="help" class="round-button" aria-label="Cómo jugar" title="Cómo jugar">?</button>
+ <button id="pause" class="round-button" aria-label="Pausar" title="Pausar">Ⅱ</button>
+</header>
+<section class="battlefield" aria-label="Campo de batalla de cinco carriles">
+ <canvas id="game" aria-label="Tablero. Selecciona un Pug y toca una casilla." tabindex="0"></canvas>
+ <div id="hint" class="hint" role="status">Tu primera misión: coloca a Chef Migajas en una casilla de la izquierda.</div>
+ <div id="toast" class="toast" role="status"></div>
+ <div id="boss-bar" class="boss-bar" hidden><span>♛ EL BARÓN VON BIGOTES</span><div class="boss-track"><i id="boss-fill"></i></div><small id="boss-phase">Fase 1</small></div>
+ <div id="banner" class="wave-banner" hidden></div>
+</section>
+<footer class="deck" aria-label="Seleccionar un Pug"><div id="cards" class="cards"></div><button id="remove" class="remove-button" aria-label="Retirar un Pug y recuperar la mitad de su coste"><span>↶</span><small>Retirar</small></button></footer>
+<div id="menu" class="overlay">
+ <section class="start-panel"><div class="eyebrow">LA BATALLA DEL JARDÍN</div><h1>PUGS <em>vs.</em><br><span>SCHNAUZERS</span></h1><p class="tagline">Un patio. Cinco Pugs.<br>Demasiados bigotes.</p><div class="hero-dogs"><canvas id="hero-pug" width="210" height="180"></canvas><span class="versus">vs.</span><canvas id="hero-enemy" width="210" height="180"></canvas></div><button id="start" class="primary-button">¡Defiende el jardín! <span>➜</span></button><p class="start-note">Un nivel · 6–9 minutos · Toca y coloca</p><button id="install-help" class="text-button">Instalar en iPhone ↗</button><div id="loading" role="status">Preparando el jardín…</div></section>
+</div>
+<div id="pause-menu" class="overlay" hidden><section class="dialog"><div class="eyebrow">PAUSA PARA OLER LAS FLORES</div><h2>El jardín puede esperar.</h2><p>La partida está detenida.</p><button id="resume" class="primary-button">Seguir jugando ➜</button><button id="restart-pause" class="secondary-button">Empezar de nuevo</button></section></div>
+<div id="result" class="overlay" hidden><section class="dialog result-panel"><div id="result-eyebrow" class="eyebrow"></div><canvas id="result-dog" width="150" height="130"></canvas><h2 id="result-title"></h2><p id="result-text"></p><div id="result-stats" class="result-stats"></div><button id="restart-result" class="primary-button">Otra ronda ➜</button></section></div>
+<div id="guide" class="overlay" hidden><section class="dialog guide-panel"><div class="eyebrow">MANUAL PARA PATITAS</div><h2>Tu jardín, tus reglas.</h2><p>Selecciona un Pug abajo y toca una casilla iluminada. Los enemigos llegan por la derecha.</p><div class="guide-grid"><div><b>✦ Genera premios</b><p>Coloca Chefs atrás. Toca los premios para recogerlos; se recogen solos después de 9 segundos.</p></div><div><b>◆ Defiende los cinco carriles</b><p>Atacantes atrás, cojines delante. Polar frena y DJ golpea grupos en su carril.</p></div><div><b>♛ Lee al Barón</b><p>La fila naranja anuncia su habilidad. Durante la preparación recibe 25% más daño.</p></div><div><b>↶ Cambia de plan</b><p>Retira un Pug para recuperar la mitad de su coste. Pierdes si cruzan tres enemigos o el jefe.</p></div></div><details><summary>Conoce a los cinco Schnauzers</summary><p>Bigotes: normal. Turbo: rápido y frágil. Grandote: resistente. Olla de acero: rompe primero su armadura. Saltimbanqui: salta una unidad; coloca una segunda defensa detrás.</p></details><button id="close-guide" class="primary-button">Entendido ➜</button></section></div>
+<div id="install" class="overlay" hidden><section class="dialog"><div class="eyebrow">LLEVA EL JARDÍN CONTIGO</div><h2>Instala en tu iPhone.</h2><p>Abre el juego en <b>Safari</b>. Toca <b>Compartir</b> y después <b>Agregar a inicio</b>. Abre el nuevo icono y gira tu iPhone.</p><p id="offline-status" class="offline-status">La primera carga necesita conexión. Luego, espera a que el jardín esté listo para jugar sin internet.</p><button id="close-install" class="primary-button">Listo ➜</button></section></div>
+</main>
+<div id="rotate" class="rotate-screen"><div class="rotate-phone">▯ <span>↻</span></div><h2>Gira tu iPhone<br>para jugar.</h2><p>Los bigotes necesitan espacio.</p></div>
+<noscript>Activa JavaScript para defender el jardín.</noscript>
+<script type="module" src="./src/app.js"></script>
+</body></html>
