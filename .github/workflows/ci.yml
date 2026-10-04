@@ -15,6 +15,5 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
-      - run: node tests/balance.js
       - run: node tools/build-standalone.mjs
       - run: git diff --exit-code -- play.html

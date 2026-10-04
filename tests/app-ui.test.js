@@ -13,7 +13,7 @@ function boot(){
  for(const id of ['pause-menu','result','guide','install','boss-bar','banner'])document.getElementById(id).hidden=true;
  const storage={};let now=1;
  const sandbox={console,document,navigator:{},window:{devicePixelRatio:1,addEventListener:(k,f)=>events[k]=f},localStorage:{getItem:k=>storage[k]||null,setItem:(k,v)=>storage[k]=v},performance:{now:()=>now},matchMedia:()=>orient,ResizeObserver:class{observe(){}},Image:class{set src(v){queueMicrotask(()=>this.onload?.());}},requestAnimationFrame:f=>frames.push(f),Promise,Math,queueMicrotask};
- const context=vm.createContext(sandbox);const root=new URL('../',import.meta.url);let source='';for(const name of ['config','engine','renderer','audio','app'])source+=fs.readFileSync(new URL('src/'+name+'.js',root),'utf8').replace(/^import .*?;\s*$/gm,'').replace(/export /g,'')+'\n';
+ const context=vm.createContext(sandbox);const root=new URL('../',import.meta.url);let source='';for(const name of ['config','engine','art','renderer','audio','app'])source+=fs.readFileSync(new URL('src/'+name+'.js',root),'utf8').replace(/^import .*?;\s*$/gm,'').replace(/export /g,'')+'\n';
  vm.runInContext(source,context);return {els,events,orient,context,document,frame:dt=>{now+=dt*1000;const f=frames.shift();f?.(now);},get:code=>vm.runInContext(code,context)};
 }
 async function ready(){const h=boot();await new Promise(resolve=>setImmediate(resolve));return h;}

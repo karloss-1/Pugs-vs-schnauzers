@@ -1,3 +1,4 @@
+import {spriteDog,garden,artReady,reducedMotion} from './art.js';
 import {WORLD,PUGS,ENEMIES,laneY,cellX} from './config.js';
 const OUT='#423849';
 export function ellipse(c,x,y,rx,ry,fill,stroke=OUT,lw=2.5){c.beginPath();c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke();}}
@@ -5,7 +6,7 @@ export function round(c,x,y,w,h,r,fill,stroke=null){c.beginPath();c.roundRect(x,
 function path(c,points,fill,stroke=OUT,lw=2.5){c.beginPath();c.moveTo(...points[0]);for(const p of points.slice(1))c.lineTo(...p);c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke();}}
 function line(c,x,y,x2,y2,color=OUT,w=2.5){c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.strokeStyle=color;c.lineWidth=w;c.lineCap='round';c.stroke();}
 function bone(c,x,y,s=1,color='#ffe9b2'){c.save();c.translate(x,y);c.scale(s,s);round(c,-11,-4,22,8,3,color,OUT);for(const a of [-1,1])for(const b of [-1,1])ellipse(c,a*10,b*4,4,4,color,OUT,1.5);c.restore();}
-export function drawDog(c,{x=0,y=0,type='bark',enemy=false,t=0,scale=1,hit=0,attack=0,walking=false,boss=false,armor=0,slow=0}={}){
+function vectorDog(c,{x=0,y=0,type='bark',enemy=false,t=0,scale=1,hit=0,attack=0,walking=false,boss=false,armor=0,slow=0}={}){
  c.save();c.translate(x,y);const bob=Math.sin(t*(walking?9:3))* (walking?3:1.6);c.translate(0,bob);const squash=attack>0?Math.sin(attack*18)*.06:0;c.scale(scale*(1+squash),scale*(1-squash));
  if(enemy)c.scale(-1,1);
  const def=enemy?ENEMIES[type]:PUGS.find(d=>d.id===type);const base=enemy?(def?.color||'#a6adb9'):'#e8bb83';const shade=enemy?'#768297':'#cc9967';const trim=def?.color||'#ffbd57';const phase=t*9;
@@ -52,37 +53,47 @@ export function drawDog(c,{x=0,y=0,type='bark',enemy=false,t=0,scale=1,hit=0,att
  if(slow>0){c.globalAlpha=.75;for(let i=0;i<3;i++){const a=t+i*2.1;ellipse(c,Math.cos(a)*39,Math.sin(a)*15-4,3,3,'#d6fbff',null);}}
  c.restore();
 }
+export function drawDog(c,o={}){if(!spriteDog(c,o))vectorDog(c,o);}
 export class Renderer {
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.background=document.createElement('canvas');this.background.width=WORLD.w;this.background.height=WORLD.h;this.buildBackground(this.background.getContext('2d'));}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.background=document.createElement('canvas');this.background.width=WORLD.w;this.background.height=WORLD.h;this.buildBackground(this.background.getContext('2d'));artReady.then(()=>this.buildBackground(this.background.getContext('2d')));}
  resize(){const r=this.canvas.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);}
  buildBackground(c){const gradient=c.createLinearGradient(0,0,0,560);gradient.addColorStop(0,'#a7d8c4');gradient.addColorStop(.3,'#b5d9ac');gradient.addColorStop(1,'#689e75');c.fillStyle=gradient;c.fillRect(0,0,1080,560);
+ if(garden?.complete&&garden.naturalWidth)c.drawImage(garden,0,0,1080,560);
  // Original backyard: layered bushes, picket fence, border stones and hand-drawn turf.
- for(let x=0;x<1100;x+=50){ellipse(c,x,27,54,34,x%100?'#67996f':'#7aa57a',null);round(c,x,0,29,38,4,'#e6d5b1','#acb49c');}
- round(c,30,35,1040,493,26,'#53876c','#386750');round(c,96,34,932,496,19,'#c3c29a','#879b73');
- for(let r=0;r<5;r++){round(c,112,42+r*96,900,94,7,r%2?'#8cbe82':'#9ac88c',null);for(let col=0;col<9;col++){if((col+r)%2===0)round(c,112+col*100,42+r*96,98,94,6,'#ffffff09');for(let i=0;i<3;i++){const x=127+col*100+((i*31+r*13)%71),y=62+r*96+((col*17+i*23)%64);line(c,x,y,x-2,y-5,'#70a77170',1);line(c,x,y,x+3,y-4,'#70a77170',1);}}}
+ round(c,106,37,912,489,14,'#44684645','#668562');
+ for(let r=0;r<5;r++){round(c,112,42+r*96,900,94,7,r%2?'#8fbc777d':'#bbd79c7d',null);for(let col=0;col<9;col++){round(c,112+col*100,42+r*96,98,94,6,(col+r)%2?'#ffffff03':'#ffffff12','#e7e8b94d');for(let i=0;i<3;i++){const x=127+col*100+((i*31+r*13)%71),y=62+r*96+((col*17+i*23)%64);line(c,x,y,x-2,y-5,'#70a77170',1);line(c,x,y,x+3,y-4,'#70a77170',1);}}}
  for(let y=65;y<525;y+=35){round(c,1018,y,22,29,7,'#d5ceab','#aaa985');}
  round(c,39,54,49,463,15,'#caac82','#927f64');for(let r=0;r<5;r++){ellipse(c,64,laneY(r),16,19,'#e8cfaa','#ab9579');ellipse(c,64,laneY(r)+4,7,8,'#b29a7c',null);for(let i=0;i<3;i++)ellipse(c,57+i*7,laneY(r)-7,3,4,'#b29a7c',null);}
  for(let x=5;x<1080;x+=43){const y=540+(x%3)*2;ellipse(c,x,y,22,16,'#56846b',null);if(x%2){for(let i=0;i<5;i++){const a=i*1.256;ellipse(c,x+Math.cos(a)*5,y+Math.sin(a)*5,4,4,'#f5cf84',null);}ellipse(c,x,y,3,3,'#b68e60',null);}}
  }
- draw(g,selected,remove=false){const c=this.ctx;c.setTransform(this.canvas.width/WORLD.w,0,0,this.canvas.height/WORLD.h,0,0);c.drawImage(this.background,0,0);c.save();if(g.shake>0)c.translate(Math.sin(g.age*90)*3*g.shake,Math.cos(g.age*75)*2*g.shake);
+ draw(g,selected,remove=false){const c=this.ctx;c.setTransform(this.canvas.width/WORLD.w,0,0,this.canvas.height/WORLD.h,0,0);c.drawImage(this.background,0,0);c.save();if(g.shake>0&&!reducedMotion)c.translate(Math.sin(g.age*90)*3*g.shake,Math.cos(g.age*75)*2*g.shake);
  if(selected||remove)for(let r=0;r<5;r++)for(let col=0;col<9;col++){const valid=remove?g.pugs.some(p=>p.row===r&&p.col===col):g.valid(selected,r,col);if(valid){round(c,115+col*100,45+r*96,94,88,10,remove?'#f79c8150':'#fff6ae33',remove?'#e49b80':'#f4f0b288');}}
  for(let row=0;row<5;row++)if(g.enemies.some(e=>e.row===row&&e.x<WORLD.left+150)){round(c,112,42+row*96,130,94,7,`rgba(240,130,106,${.15+.06*Math.sin(g.age*8)})`);}
- const boss=g.enemies.find(e=>e.type==='boss');if(boss?.warning>0){const row=boss.pending==='move'?boss.nextRow:boss.row;round(c,112,42+row*96,900,94,7,`rgba(255,166,119,${.13+.07*Math.sin(g.age*14)})`,'#ffe1a9');}
+ const boss=g.enemies.find(e=>e.type==='boss');if(boss){const shade=c.createRadialGradient(boss.x,boss.y,70,boss.x,boss.y,440);shade.addColorStop(0,'#813b5c00');shade.addColorStop(1,'#46234514');c.fillStyle=shade;c.fillRect(0,0,1080,560);}if(boss?.warning>0){const row=boss.pending==='move'?boss.nextRow:boss.row;round(c,112,42+row*96,900,94,7,`rgba(255,166,119,${.13+.07*Math.sin(g.age*14)})`,'#ffe1a9');}
  for(let r=0;r<5;r++){
  for(const p of g.pugs.filter(p=>p.row===r)){const intro=Math.min(1,(g.age-p.born)*4);c.save();c.globalAlpha=intro;drawDog(c,{...p,t:g.age+p.id*.8,scale:.9*(.7+.3*intro)});c.restore();this.health(p.x,p.y+42,55,p.hp/p.maxHp,'#f7edb1',p.hit>0||p.hp<p.maxHp);}
- for(const s of g.shots.filter(s=>s.row===r)){c.save();c.translate(s.x,s.y);c.rotate(s.age*7);if(s.type==='splash'){ellipse(c,0,0,12,12,'#b195db');ellipse(c,0,0,4,4,'#e8d1fc',null);}else if(s.type==='slow'){path(c,[[0,-12],[9,0],[0,12],[-9,0]],'#b9eef5');line(c,-7,0,7,0,'#fff',2);}else{bone(c,0,0,.7);}c.restore();}
- for(const e of g.enemies.filter(e=>e.row===r)){const block=g.pugs.some(p=>p.row===r&&e.x-p.x<62&&e.x-p.x>-25);let yy=e.y;if(e.type==='jumper'&&e.attack>.3)yy-=Math.sin((.65-e.attack)*9)*38;drawDog(c,{...e,y:yy+(e.type==='boss'&&e.row===0?26:0),enemy:true,boss:e.type==='boss',scale:e.type==='boss'?1.38:(e.type==='tank'?1.08:.9),t:g.age+e.id,walking:!block&&e.warning<=0});this.health(e.x,e.y+(e.type==='boss'?49:44),e.type==='boss'?85:50,e.hp/e.maxHp,'#f1a69a',e.type!=='boss');if(e.armor>0)this.health(e.x,e.y+49,50,e.armor/e.maxArmor,'#d2e0ef',true);}
+ for(const s of g.shots.filter(s=>s.row===r))this.projectile(s);
+ for(const e of g.enemies.filter(e=>e.row===r)){const block=g.pugs.some(p=>p.row===r&&e.x-p.x<62&&e.x-p.x>-25);let yy=e.y;if(e.type==='jumper'&&e.attack>.3)yy-=Math.sin((.65-e.attack)*9)*38;drawDog(c,{...e,y:yy+(e.type==='boss'&&e.row===0?26:0),enemy:true,boss:e.type==='boss',scale:e.type==='boss'?1.38:(e.type==='tank'?1.08:.9),t:g.age+e.id,walking:!block&&e.warning<=0&&e.stun<=0});this.health(e.x,e.y+(e.type==='boss'?49:44),e.type==='boss'?85:50,e.hp/e.maxHp,'#f1a69a',e.type!=='boss');if(e.armor>0)this.health(e.x,e.y+49,50,e.armor/e.maxArmor,'#d2e0ef',true);}
  }
- for(const d of g.drops){const y=d.y+Math.sin(g.age*4+d.id)*4;c.save();c.translate(d.x,y);c.rotate(Math.sin(g.age*2+d.id)*.12);ellipse(c,0,0,23,23,'#ffe4a4','#c79550',2);ellipse(c,-4,-6,13,8,'#fff0c7',null);bone(c,0,0,.9,'#efba6c');c.restore();}
+ for(const d of g.drops){const y=d.y+Math.sin(g.age*4+d.id)*4-Math.sin(Math.min(1,d.age/.55)*Math.PI)*17;c.save();c.translate(d.x,y);c.rotate(Math.sin(g.age*2+d.id)*.12);ellipse(c,0,0,23,23,'#ffe4a4','#c79550',2);ellipse(c,-4,-6,13,8,'#fff0c7',null);bone(c,0,0,.9,'#efba6c');c.restore();}
  for(const f of g.effects)this.effect(f,g.age);
  c.restore();
  // Breezy leaves, kept out of the tactical foreground.
  for(let i=0;i<5;i++){const x=(g.age*9+i*237)%1100,y=18+Math.sin(g.age+i)*6;c.save();c.translate(x,y);c.rotate(g.age+i);ellipse(c,0,0,6,3,'#e3e8aa',null);c.restore();}
  if(g.status==='ready'){drawDog(c,{x:360,y:300,type:'bark',scale:2.6,t:g.age});drawDog(c,{x:755,y:300,type:'basic',enemy:true,scale:2.7,t:g.age,walking:true});}
  }
+ projectile(s){const c=this.ctx;c.save();const fire=s.type==='splash',ice=s.type==='slow';
+ const count=reducedMotion?3:7;for(let i=count;i>0;i--){c.globalAlpha=(1-i/(count+1))*.5;const xx=s.x-i*7,yy=s.y+Math.sin(s.age*14+i)*3;ellipse(c,xx,yy,fire?8:4,fire?5:3,fire?'#ffad55':ice?'#b2f1ff':'#ffe6ad',null);}c.globalAlpha=1;c.translate(s.x,s.y);
+ if(fire){c.rotate(Math.sin(s.age*12)*.1);path(c,[[-23,-7],[-8,-10],[-17,-18],[5,-10],[13,-3],[12,6],[4,12],[-10,8],[-24,13],[-16,2]],'#f58244',null);ellipse(c,2,0,9,8,'#ffd073',null);ellipse(c,5,0,4,5,'#fff0b3',null);}
+ else if(ice){c.rotate(s.age*2);path(c,[[-16,0],[0,-9],[14,0],[0,9]],'#9ddcf1','#e4fcff',1.5);line(c,-9,0,9,0,'#fff',1.5);}
+ else{c.rotate(s.age*9);bone(c,0,0,.7);}c.restore();}
  health(x,y,w,ratio,color,show){if(!show)return;const c=this.ctx;round(c,x-w/2,y,w,5,3,'#37504dcc');round(c,x-w/2+1,y+1,Math.max(0,(w-2)*Math.max(0,ratio)),3,2,color);}
- effect(f,t){const c=this.ctx,p=1-f.ttl/f.max;c.save();c.globalAlpha=Math.min(1,f.ttl*4);if(f.label){c.font='bold 28px ui-rounded, system-ui';c.textAlign='center';c.strokeStyle='#7b6344';c.lineWidth=4;c.strokeText(f.label,f.x,f.y-p*45);c.fillStyle=f.color;c.fillText(f.label,f.x,f.y-p*45);}
- else{const count=f.kind==='bossExit'?28:8;for(let i=0;i<count;i++){const a=i*Math.PI*2/count+f.seed*5,r=p*(f.kind==='bossExit'?170:45),x=f.x+Math.cos(a)*r,y=f.y+Math.sin(a)*r+p*p*25;ellipse(c,x,y,(1-p)*5+1,(1-p)*4+1,f.color,null);}if(['splash','bark','bossExit'].includes(f.kind)){c.beginPath();c.arc(f.x,f.y,12+p*(f.kind==='bark'?130:75),0,Math.PI*2);c.strokeStyle=f.color;c.lineWidth=6*(1-p);c.stroke();}}
+ effect(f,t){const c=this.ctx,p=1-f.ttl/f.max;c.save();
+ if(f.kind==='ghost'){c.globalAlpha=(1-p)*.7;drawDog(c,{x:f.x+p*16,y:f.y-p*20,type:f.label,enemy:true,boss:f.label==='boss',scale:(f.label==='boss'?1.38:.9)*(1-p*.3),t});c.restore();return;}
+ if(f.kind==='lightning'){c.globalAlpha=1-p;c.strokeStyle=f.color;c.lineWidth=3;c.beginPath();c.moveTo(f.x,f.y);for(let i=1;i<=8;i++){const a=i/8;c.lineTo(f.x+(f.toX-f.x)*a,f.y+(f.toY-f.y)*a+(i===8?0:Math.sin(i*7+f.seed*11)*10));}c.stroke();c.restore();return;}
+ if(f.kind==='wind'){c.globalAlpha=1-p;for(let i=0;i<4;i++){c.strokeStyle='#e5eed8';c.lineWidth=2;c.beginPath();c.ellipse(f.x-p*600-i*20,f.y,12+i*7,12+i*8,0,.3,Math.PI*1.8);c.stroke();}c.restore();return;}
+ c.globalAlpha=Math.min(1,f.ttl*4);if(f.label){c.font='bold 28px ui-rounded, system-ui';c.textAlign='center';c.strokeStyle='#7b6344';c.lineWidth=4;c.strokeText(f.label,f.x,f.y-p*45);c.fillStyle=f.color;c.fillText(f.label,f.x,f.y-p*45);}
+ else{const count=reducedMotion?4:f.kind==='bossExit'?24:f.kind==='fire'?12:8;for(let i=0;i<count;i++){const a=i*Math.PI*2/count+f.seed*5,r=p*(f.kind==='bossExit'?170:45),x=f.x+Math.cos(a)*r,y=f.y+Math.sin(a)*r+p*p*25;if(f.kind==='ice'||f.kind==='thaw'){path(c,[[x,y-7*(1-p)],[x+3,y],[x,y+7*(1-p)],[x-3,y]],f.color,null);}else ellipse(c,x,y,(1-p)*5+1,(1-p)*4+1,f.color,null);}if(['fire','bark','bossExit','bossArrival','produce'].includes(f.kind)){c.beginPath();c.arc(f.x,f.y,12+p*(f.kind==='bark'?130:75),0,Math.PI*2);c.strokeStyle=f.color;c.lineWidth=6*(1-p);c.stroke();}}
  c.restore();}
 }
 export function paintPortrait(canvas,type,enemy=false,boss=false){const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);c.save();c.translate(canvas.width/2,canvas.height*.68);const scale=Math.min(canvas.width/110,canvas.height/142);drawDog(c,{type,enemy,boss,scale,t:0,armor:enemy&&type==='armor'?120:0});c.restore();}
