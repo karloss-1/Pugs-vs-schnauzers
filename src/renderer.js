@@ -58,16 +58,50 @@ export class Renderer {
  constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.background=document.createElement('canvas');this.background.width=WORLD.w;this.background.height=WORLD.h;this.buildBackground(this.background.getContext('2d'));artReady.then(()=>this.buildBackground(this.background.getContext('2d')));}
  resize(){const r=this.canvas.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);}
  buildBackground(c){const gradient=c.createLinearGradient(0,0,0,560);gradient.addColorStop(0,'#a7d8c4');gradient.addColorStop(.3,'#b5d9ac');gradient.addColorStop(1,'#689e75');c.fillStyle=gradient;c.fillRect(0,0,1080,560);
- if(garden?.complete&&garden.naturalWidth)c.drawImage(garden,0,0,1080,560);
- // Original backyard: layered bushes, picket fence, border stones and hand-drawn turf.
- round(c,106,37,912,489,14,'#44684645','#668562');
- for(let r=0;r<5;r++){round(c,112,42+r*96,900,94,7,r%2?'#8fbc777d':'#bbd79c7d',null);for(let col=0;col<9;col++){round(c,112+col*100,42+r*96,98,94,6,(col+r)%2?'#ffffff03':'#ffffff12','#e7e8b94d');for(let i=0;i<3;i++){const x=127+col*100+((i*31+r*13)%71),y=62+r*96+((col*17+i*23)%64);line(c,x,y,x-2,y-5,'#70a77170',1);line(c,x,y,x+3,y-4,'#70a77170',1);}}}
- for(let y=65;y<525;y+=35){round(c,1018,y,22,29,7,'#d5ceab','#aaa985');}
- round(c,39,54,49,463,15,'#caac82','#927f64');for(let r=0;r<5;r++){ellipse(c,64,laneY(r),16,19,'#e8cfaa','#ab9579');ellipse(c,64,laneY(r)+4,7,8,'#b29a7c',null);for(let i=0;i<3;i++)ellipse(c,57+i*7,laneY(r)-7,3,4,'#b29a7c',null);}
- for(let x=5;x<1080;x+=43){const y=540+(x%3)*2;ellipse(c,x,y,22,16,'#56846b',null);if(x%2){for(let i=0;i<5;i++){const a=i*1.256;ellipse(c,x+Math.cos(a)*5,y+Math.sin(a)*5,4,4,'#f5cf84',null);}ellipse(c,x,y,3,3,'#b68e60',null);}}
+ if(garden?.complete&&garden.naturalWidth){
+ // Fit the painted lawn to the existing logical field; compress only scenery
+ // margins so every row, including the first, sits on grass instead of fence.
+ const sx=[0,garden.naturalWidth*.09,garden.naturalWidth*.935,garden.naturalWidth],sy=[0,garden.naturalHeight*.2,garden.naturalHeight*.865,garden.naturalHeight];
+ const dx=[0,WORLD.left,WORLD.left+WORLD.cols*WORLD.cellW,WORLD.w],dy=[0,WORLD.top,WORLD.top+WORLD.rows*WORLD.cellH,WORLD.h];
+ for(let r=0;r<3;r++)for(let col=0;col<3;col++)c.drawImage(garden,sx[col],sy[r],sx[col+1]-sx[col],sy[r+1]-sy[r],dx[col],dy[r],dx[col+1]-dx[col],dy[r+1]-dy[r]);
+ }
+ // Mowing seams belong to the lawn, not a translucent board.
+ const {left,top,rows,cols,cellW,cellH}=WORLD,right=left+cols*cellW,bottom=top+rows*cellH;
+ c.save();c.beginPath();c.rect(left,top,right-left,bottom-top);c.clip();
+ for(let r=0;r<rows;r++){
+  const y=top+r*cellH,shade=c.createLinearGradient(0,y,0,y+cellH);
+  shade.addColorStop(0,r%2?'#42612f08':'#fff4bc08');shade.addColorStop(.5,'#ffffff00');shade.addColorStop(1,r%2?'#42612f10':'#fff4bc05');
+  c.fillStyle=shade;c.fillRect(left,y,right-left,cellH);
+ }
+ // Fine paired cuts; columns are deliberately less visible than lanes.
+ for(let r=1;r<rows;r++){const y=top+r*cellH;line(c,left,y,right,y,'#45643a28',1);line(c,left,y+1,right,y+1,'#e7e6ac20',1);}
+ c.setLineDash([2,11]);for(let col=1;col<cols;col++)line(c,left+col*cellW,top,left+col*cellW,bottom,'#e8e8b521',1);c.setLineDash([]);
+ c.restore();
+ // Five separate stepping stones with engraved paws replace the left UI rail.
+ for(let r=0;r<rows;r++){
+  const x=76+(r%2?3:-3),y=laneY(r);
+  ellipse(c,x+2,y+12,19,7,'#334b3033',null);
+  c.save();c.translate(x,y);c.rotate((r%2?1:-1)*.12);
+  path(c,[[-19,-6],[-11,-17],[10,-16],[20,-4],[16,14],[-9,18],[-21,6]],'#c1b79a','#827e625e',1.2);
+  line(c,-11,-13,8,-12,'#f0e7cc77',1.2);
+  ellipse(c,0,5,6,5,'#77796077',null);for(const [px,py] of [[-7,-3],[0,-6],[7,-3]])ellipse(c,px,py,2.5,3,'#77796077',null);
+  c.restore();
+ }
+ // The existing painted stone path remains the right entrance. Tiny footprints
+ // connect it to the row centers without covering it with another paved strip.
+ for(let r=0;r<rows;r++)for(let i=0;i<2;i++){
+  const x=right+12+i*18,y=laneY(r)+(i%2?4:-4);
+  ellipse(c,x,y,3,2,'#626d4c45',null);ellipse(c,x+4,y-3,1.2,1.2,'#626d4c45',null);ellipse(c,x+4,y,1.2,1.2,'#626d4c45',null);
+ }
+
  }
  draw(g,selected,remove=false){const c=this.ctx;c.setTransform(this.canvas.width/WORLD.w,0,0,this.canvas.height/WORLD.h,0,0);c.drawImage(this.background,0,0);c.save();if(g.shake>0&&!reducedMotion)c.translate(Math.sin(g.age*90)*3*g.shake,Math.cos(g.age*75)*2*g.shake);
- if(selected||remove)for(let r=0;r<5;r++)for(let col=0;col<9;col++){const valid=remove?g.pugs.some(p=>p.row===r&&p.col===col):g.valid(selected,r,col);if(valid){round(c,115+col*100,45+r*96,94,88,10,remove?'#f79c8150':'#fff6ae33',remove?'#e49b80':'#f4f0b288');}}
+ if(selected||remove)for(let r=0;r<WORLD.rows;r++)for(let col=0;col<WORLD.cols;col++){
+  const valid=remove?g.pugs.some(p=>p.row===r&&p.col===col):g.valid(selected,r,col);
+  if(valid)this.cellHighlight(r,col,remove?'#eda58b':'#fff0b4',.8);
+ }
+ if(this.cellFeedback){const f=this.cellFeedback,remaining=f.until-performance.now();if(remaining>0)this.cellHighlight(f.row,f.col,f.valid?'#fff5c7':'#efac96',Math.min(1,remaining/180));else this.cellFeedback=null;}
+
  for(let row=0;row<5;row++)if(g.enemies.some(e=>e.row===row&&e.x<WORLD.left+150)){round(c,112,42+row*96,130,94,7,`rgba(240,130,106,${.15+.06*Math.sin(g.age*8)})`);}
  const boss=g.enemies.find(e=>e.type==='boss');if(boss){const shade=c.createRadialGradient(boss.x,boss.y,70,boss.x,boss.y,440);shade.addColorStop(0,'#813b5c00');shade.addColorStop(1,'#46234514');c.fillStyle=shade;c.fillRect(0,0,1080,560);}if(boss?.warning>0){const row=boss.pending==='move'?boss.nextRow:boss.row;round(c,112,42+row*96,900,94,7,`rgba(255,166,119,${.13+.07*Math.sin(g.age*14)})`,'#ffe1a9');}
  for(let r=0;r<5;r++){
@@ -81,6 +115,15 @@ export class Renderer {
  // Breezy leaves, kept out of the tactical foreground.
  for(let i=0;i<5;i++){const x=(g.age*9+i*237)%1100,y=18+Math.sin(g.age+i)*6;c.save();c.translate(x,y);c.rotate(g.age+i);ellipse(c,0,0,6,3,'#e3e8aa',null);c.restore();}
  if(g.status==='ready'){drawDog(c,{x:360,y:300,type:'bark',scale:2.6,t:g.age});drawDog(c,{x:755,y:300,type:'basic',enemy:true,scale:2.7,t:g.age,walking:true});}
+ }
+ feedback(row,col,valid){this.cellFeedback={row,col,valid,until:performance.now()+420};}
+ cellHighlight(row,col,color,strength){
+ const c=this.ctx,x=WORLD.left+col*WORLD.cellW,y=WORLD.top+row*WORLD.cellH;
+ c.save();c.globalAlpha=strength;
+ const glow=c.createRadialGradient(x+50,y+48,8,x+50,y+48,49);glow.addColorStop(0,color+'20');glow.addColorStop(1,color+'00');c.fillStyle=glow;c.fillRect(x+3,y+3,94,90);
+ c.strokeStyle=color;c.lineWidth=1.8;c.lineCap='round';c.beginPath();
+ // Open corner marks leave the original grass texture exposed.
+ for(const [cx,cy,dx,dy] of [[x+9,y+9,1,1],[x+91,y+9,-1,1],[x+9,y+87,1,-1],[x+91,y+87,-1,-1]]){c.moveTo(cx,cy+dy*10);c.lineTo(cx,cy);c.lineTo(cx+dx*10,cy);}c.stroke();c.restore();
  }
  projectile(s){const c=this.ctx;c.save();const fire=s.type==='splash',ice=s.type==='slow';
  const count=reducedMotion?3:7;for(let i=count;i>0;i--){c.globalAlpha=(1-i/(count+1))*.5;const xx=s.x-i*7,yy=s.y+Math.sin(s.age*14+i)*3;ellipse(c,xx,yy,fire?8:4,fire?5:3,fire?'#ffad55':ice?'#b2f1ff':'#ffe6ad',null);}c.globalAlpha=1;c.translate(s.x,s.y);
